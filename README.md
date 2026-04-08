@@ -52,6 +52,24 @@ Wormhole Qt acts as a native GUI frontend for the official Magic Wormhole comman
 
 All file transfers remain **end-to-end encrypted** using the same PAKE (Password-Authenticated Key Exchange) security as the original Magic Wormhole.
 
+## 💡 Inspiration
+
+This project draws significant inspiration from **[iyox-Wormhole](https://github.com/iyox-studios/iyox-Wormhole.git)** , a sleek and modern Magic Wormhole GUI client.
+
+**What inspired this project:**
+- **Clean, intuitive UI layout** - The tabbed interface with clear visual hierarchy
+- **Dark theme aesthetic** - Modern, eye-friendly dark mode design
+- **Progress visualization** - Clear transfer status and code display
+- **Settings organization** - Logical grouping of configuration options
+
+While iyox-Wormhole provided the initial design inspiration, Wormhole Qt is a complete **Qt6/C++ rewrite** that adds:
+- Native Linux desktop integration
+- CMake build system for easier compilation
+- Simplified codebase for maintainability
+- GPL v3 licensing for open-source compliance
+
+*Special thanks to the iyox-studios team for creating an excellent reference implementation!* 🙏
+
 ## 📋 Prerequisites
 
 ### Required
