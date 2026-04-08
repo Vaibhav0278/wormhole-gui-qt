@@ -4,7 +4,7 @@
 
 A beautiful desktop GUI client for [Magic Wormhole](https://github.com/magic-wormhole/magic-wormhole) built with Qt6 and C++.
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Qt](https://img.shields.io/badge/Qt-6.0-green.svg)](https://www.qt.io/)
 [![C++](https://img.shields.io/badge/C%2B%2B-17-blue.svg)](https://isocpp.org/)
 [![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20macOS%20%7C%20Windows-lightgrey.svg)]()
