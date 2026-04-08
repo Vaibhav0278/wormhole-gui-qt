@@ -1,0 +1,13 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Wormhole
+GenericName=File Transfer
+Comment=Send and receive files securely using magic-wormhole
+Exec=wormhole-qt
+Icon=wormhole-qt
+Terminal=false
+Categories=Network;FileTransfer;Qt;
+Keywords=wormhole;transfer;send;receive;file;secure;encrypted;
+StartupNotify=true
+StartupWMClass=wormhole-qt
