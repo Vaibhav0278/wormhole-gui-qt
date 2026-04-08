@@ -10,7 +10,7 @@ A beautiful desktop GUI client for [Magic Wormhole](https://github.com/magic-wor
 [![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20macOS%20%7C%20Windows-lightgrey.svg)]()
 
 <p align="center">
-  <img src="screenshots/main-window.png" alt="Wormhole Qt Interface" width="600"/>
+  <img src="screenshots/main-window.png"/>
 </p>
 
 </div>
