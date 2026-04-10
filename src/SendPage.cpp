@@ -475,7 +475,7 @@ void SendPage::pickFiles()
         this,
         "Select files to send",
         QString(),
-                                                      "All files (*.*)"
+        "All files (*.*)"
     );
 
     if (!files.isEmpty()) {
@@ -489,7 +489,7 @@ void SendPage::pickFolder()
         this,
         "Select folder to send",
         QString(),
-                                                    QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks
+        QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks
     );
 
     if (!dir.isEmpty()) {
@@ -508,8 +508,8 @@ void SendPage::startSend()
     if (process) { process->kill(); process->deleteLater(); }
 
     QSettings s;
-    QString relay   = s.value("relay", "").toString();
-    int codeLen     = s.value("codeLength", 3).toInt();
+    QString relay = s.value("relay", "").toString();
+    int codeLen   = s.value("codeLength", 3).toInt();
 
     QStringList args;
     args << "send";
@@ -552,11 +552,12 @@ void SendPage::onProcessOutput()
     QString out = process->readAll();
     logView->append(out.trimmed());
 
-    // Extract percentage for continuous progress
+    // FIX 4: Extract percentage with bounds check to prevent rogue values
     QRegularExpression percentRx("(\\d+)%");
     QRegularExpressionMatch match = percentRx.match(out);
     if (match.hasMatch()) {
         int percent = match.captured(1).toInt();
+        if (percent < 0 || percent > 100) return; // ignore out-of-range values
         currentProgress = percent;
         progressBar->setValue(percent);
 
@@ -616,15 +617,12 @@ void SendPage::setTransferState(bool active)
     }
 }
 
+// FIX 5: Only trust the explicit "code is: X" pattern — removed the loose
+// fallback regex that could match arbitrary output from a malicious relay
 QString SendPage::extractCode(const QString &output)
 {
-    QRegularExpression rx("code is: (\\S+)");
+    QRegularExpression rx("code is: (\\d+-[a-z]+-[a-z]+(?:-[a-z]+)*)");
     QRegularExpressionMatch match = rx.match(output);
     if (match.hasMatch()) return match.captured(1);
-
-    QRegularExpression rx2("(\\d+-[a-z]+-[a-z]+(?:-[a-z]+)*)");
-    match = rx2.match(output);
-    if (match.hasMatch()) return match.captured(1);
-
     return QString();
 }
