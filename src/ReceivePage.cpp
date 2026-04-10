@@ -291,6 +291,16 @@ void ReceivePage::startReceive()
     QString code = codeInput->text().trimmed();
     if (code.isEmpty()) return;
 
+    // FIX 1: Validate the wormhole code format before passing it to the subprocess.
+    // A valid code looks like "7-guitar-mango" — a number, then two lowercase words.
+    // This blocks command injection via a crafted code input.
+    QRegularExpression codePattern("^\\d+-[a-z]+-[a-z]+$");
+    if (!codePattern.match(code).hasMatch()) {
+        statusLabel->setText("✗ Invalid code format (e.g. 7-guitar-mango)");
+        infoFrame->setVisible(true);
+        return;
+    }
+
     if (process) {
         process->kill();
         process->deleteLater();
@@ -301,33 +311,33 @@ void ReceivePage::startReceive()
     QString savePath = s.value("downloadPath",
                                QDir::homePath() + "/Downloads").toString();
 
-                               QStringList args;
-                               args << "receive";
-                               if (!relay.isEmpty()) { args << "--relay-url" << relay; }
-                               args << "--accept-file";
-                               args << "--output-file" << savePath + "/";
-                               args << code;
+    QStringList args;
+    args << "receive";
+    if (!relay.isEmpty()) { args << "--relay-url" << relay; }
+    args << "--accept-file";
+    args << "--output-file" << savePath + "/";
+    args << code;
 
-                               process = new QProcess(this);
-                               process->setProcessChannelMode(QProcess::MergedChannels);
-                               connect(process, &QProcess::readyRead, this, &ReceivePage::onProcessOutput);
-                               connect(process, &QProcess::finished, this, &ReceivePage::onProcessFinished);
+    process = new QProcess(this);
+    process->setProcessChannelMode(QProcess::MergedChannels);
+    connect(process, &QProcess::readyRead, this, &ReceivePage::onProcessOutput);
+    connect(process, &QProcess::finished, this, &ReceivePage::onProcessFinished);
 
-                               logView->clear();
-                               fileNameLabel->setText("Connecting...");
-                               fileSizeLabel->setText("");
-                               statusLabel->setText("Connecting to relay...");
-                               infoFrame->setVisible(true);
-                               openDirBtn->setVisible(false);
-                               setReceivingState(true);
+    logView->clear();
+    fileNameLabel->setText("Connecting...");
+    fileSizeLabel->setText("");
+    statusLabel->setText("Connecting to relay...");
+    infoFrame->setVisible(true);
+    openDirBtn->setVisible(false);
+    setReceivingState(true);
 
-                               process->start("wormhole", args);
+    process->start("wormhole", args);
 
-                               if (!process->waitForStarted(2000)) {
-                                   logView->append("[ERROR] Could not start 'wormhole'. Is magic-wormhole installed?\n"
-                                   "Install with:  pip install magic-wormhole");
-                                   setReceivingState(false);
-                               }
+    if (!process->waitForStarted(2000)) {
+        logView->append("[ERROR] Could not start 'wormhole'. Is magic-wormhole installed?\n"
+                        "Install with:  pip install magic-wormhole");
+        setReceivingState(false);
+    }
 }
 
 void ReceivePage::cancelReceive()
@@ -348,7 +358,13 @@ void ReceivePage::onProcessOutput()
     QRegularExpression rxFile("Receiving file.*'(.+)'");
     QRegularExpressionMatch match = rxFile.match(out);
     if (match.hasMatch()) {
-        fileNameLabel->setText(match.captured(1));
+        // FIX 3: Sanitize the filename before displaying it.
+        // A malicious relay could craft output with control characters or very long
+        // strings to break the UI. We cap the length and strip control characters.
+        QString name = match.captured(1);
+        name = name.left(200);
+        name.remove(QRegularExpression("[\\x00-\\x1F]"));
+        fileNameLabel->setText(name);
     }
 
     // Parse size
@@ -363,6 +379,9 @@ void ReceivePage::onProcessOutput()
     match = rxProgress.match(out);
     if (match.hasMatch()) {
         int percent = match.captured(1).toInt();
+        // FIX 2: Clamp progress to 0-100 to prevent a rogue relay from
+        // sending a bogus percentage that could confuse the UI.
+        if (percent < 0 || percent > 100) return;
         progressBar->setValue(percent);
         statusLabel->setText(QString("Receiving... %1%").arg(percent));
         progressTimer->stop(); // Stop animation when we have real progress
